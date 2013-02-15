@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <string>
+#include <iostream>
 
 struct test {
    int i;
@@ -11,7 +12,7 @@ struct test {
 
 LogWriter&& operator<<( LogWriter&& out, const test& t);
 LogWriter&& operator<<( LogWriter&& out, const test& t) {
-   out << "[" << t.i << "," << t.s << "]";
+   std::forward<LogWriter>(out) << "[" << t.i << "," << t.s << "]";
    return std::forward<LogWriter>(out);
 }
 
@@ -31,20 +32,23 @@ public:
       logger.setOutputChain(loggedMessages);
    }
 
-   void tearDown() 
+   void tearDown()
    {
    }
 
    void simple()
    {
+		std::cout << "foo";
+		test t = { 5, "foo" };
       logger.message(LL_error) << "a" << "b" << "c";
       logger.message(LL_debug) << "c";
+      logger.message(LL_debug) << t;
 
-      // verify
       auto messages = loggedMessages->getMessages();
-      CPPUNIT_ASSERT( messages.size() == 2);
+      CPPUNIT_ASSERT( messages.size() == 3);
       CPPUNIT_ASSERT( messages.at(0) == std::make_pair( LL_error, std::string("abc")));
       CPPUNIT_ASSERT( messages.at(1) == std::make_pair( LL_debug, std::string("c")));
+      CPPUNIT_ASSERT( messages.at(2) == std::make_pair( LL_debug, std::string("[5,foo]")));
    }
 };
 
