@@ -24,6 +24,7 @@ void Log::setOutputChain( outputChain* output) {
 }
 
 void Log::log( LogLevel ll, const std::string& str) {
+	std::lock_guard<std::mutex> lk(m_m);
 	if( output)
 		output->log( ll, str);
 }

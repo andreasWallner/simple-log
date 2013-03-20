@@ -7,6 +7,7 @@
 #include <fstream>
 #include <vector>
 #include <utility>
+#include <mutex>
 
 /*!
  * \file Log.h
@@ -87,6 +88,8 @@ private:
 	void log( LogLevel ll, const std::string& str);
 	//! the current output chain
 	outputChain* output;
+	//! synchronize log messages
+	std::mutex m_m;
 };
 
 //! a logger which can be used application wide provided for ease of use
