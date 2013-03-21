@@ -38,17 +38,20 @@ public:
 
    void simple()
    {
-		std::cout << "foo";
+		char foo[] = "foo";
 		test t = { 5, "foo" };
+		unsigned char x = 222;
+		logger.message(LL_debug) << foo;
       logger.message(LL_error) << "a" << "b" << "c";
-      logger.message(LL_debug) << "c";
       logger.message(LL_debug) << t;
+		logger.message(LL_debug) << x;
 
       auto messages = loggedMessages->getMessages();
-      CPPUNIT_ASSERT( messages.size() == 3);
-      CPPUNIT_ASSERT( messages.at(0) == std::make_pair( LL_error, std::string("abc")));
-      CPPUNIT_ASSERT( messages.at(1) == std::make_pair( LL_debug, std::string("c")));
-      CPPUNIT_ASSERT( messages.at(2) == std::make_pair( LL_debug, std::string("[5,foo]")));
+      CPPUNIT_ASSERT_MESSAGE( "number", messages.size() == 4);
+		CPPUNIT_ASSERT_MESSAGE( "0", messages.at(0) == std::make_pair( LL_debug, std::string("foo")));
+      CPPUNIT_ASSERT_MESSAGE( "1", messages.at(1) == std::make_pair( LL_error, std::string("abc")));
+      CPPUNIT_ASSERT_MESSAGE( "2", messages.at(2) == std::make_pair( LL_debug, std::string("[5,foo]")));
+		CPPUNIT_ASSERT_MESSAGE( "3", messages.at(3) == std::make_pair( LL_debug, std::string("222")));
    }
 };
 
