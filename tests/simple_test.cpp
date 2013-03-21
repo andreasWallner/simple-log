@@ -1,5 +1,5 @@
 #include <cppunit/extensions/HelperMacros.h>
-#include <Log.h>
+#include "../Log.h"
 
 #include <utility>
 #include <string>
