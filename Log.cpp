@@ -2,7 +2,9 @@
 
 #include <syslog.h>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <iomanip>
 
 Log logger;
 
@@ -51,7 +53,7 @@ void outputChain::log( LogLevel ll, const std::string& str) {
 	if( ll <= minimumLL)
 		real_log( ll, str);
 	
-	if( nextLink && ( ll > minimumLL || (ll <= minimumLL && doPropagate) ) )	
+	if( nextLink && ( ll > minimumLL || (ll <= minimumLL && doPropagate) ) )
 		nextLink->log( ll, str);
 }
 
@@ -111,14 +113,35 @@ bufferingChainLink::bufferingChainLink( LogLevel minimumLL, bool doPropagate /* 
 : outputChain( minimumLL, doPropagate, nextLink) {}
 
 const bufferingChainLink::LogBuffer& bufferingChainLink::getMessages() {
-   return buffer;
+	return buffer;
 }
 
 void bufferingChainLink::clear() {
-   buffer.clear();
+	buffer.clear();
 }
 
 void bufferingChainLink::real_log( LogLevel ll, const std::string& str) {
-   buffer.push_back( make_pair( ll, str));
+	buffer.push_back( make_pair( ll, str));
+}
+
+taggingChainLink::taggingChainLink(outputChain* nextLink /* = 0 */)
+: outputChain( LL_debug, true, nextLink) {
+	m_tp = std::chrono::system_clock::now();
+}
+
+void taggingChainLink::resetTime() {
+	m_tp = std::chrono::system_clock::now();
+}
+
+void taggingChainLink::log( LogLevel ll, const std::string& str) {
+	auto tp = std::chrono::system_clock::now();
+	auto t = tp - m_tp;
+	auto s = std::chrono::duration_cast<std::chrono::seconds>(t);
+	auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(t % std::chrono::seconds(1));
+
+	std::ostringstream prep;
+	prep << std::setw(3) << s.count() << "." << std::setw(3) << std::setfill('0') << ms.count() << " " << str;
+
+	outputChain::log(ll, prep.str());
 }
 

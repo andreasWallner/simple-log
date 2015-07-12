@@ -8,6 +8,7 @@
 #include <vector>
 #include <utility>
 #include <mutex>
+#include <chrono>
 
 /*!
  * \file Log.h
@@ -137,7 +138,11 @@ public:
 	virtual ~outputChain();
 protected:
 	//! NVI for logging a message
-	void log( LogLevel ll, const std::string& str);
+	/*! For normal chain links this method should not be touched,
+	 *  only in special cases and with care should this method
+	 *  be overridden.
+	 */
+	virtual void log( LogLevel ll, const std::string& str);
 
 	//! method which should be overloaded by concrete links 
 	/*!
@@ -247,5 +252,21 @@ protected:
    void real_log( LogLevel ll, const std::string& str);
 };
 
+//! time prepending chain link
+/*! Mainly to be used for debugging output, for productive environments
+ *  syslogChainLink should most likely be used.
+ */
+class taggingChainLink : public outputChain {
+public:
+	taggingChainLink(outputChain* nextLink = 0);
+	~taggingChainLink() {}
+	
+	void resetTime();
+protected:
+	std::chrono::system_clock::time_point m_tp;
+
+	void log(LogLevel ll, const std::string& str);
+	void real_log(LogLevel /* ll */, const std::string& /* str */) {}
+};
 
 #endif // Log_h_
