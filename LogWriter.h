@@ -38,6 +38,14 @@ public:
 	~LogWriter();
 
 private:
+	// hide, user should not copy the write
+	// internally the copy constructor is used when returning a
+	// new LogWriter from Log::message
+	LogWriter( const LogWriter& other)
+	 : buffer(other.buffer)
+	 , ll(other.ll)
+	 , logger(other.logger) {}
+
 	/*!
 	 * \param logger the Log object the LogWriter should write to
 	 * \param ll the log level of the message held be LogWriter
